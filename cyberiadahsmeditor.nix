@@ -1,4 +1,4 @@
-{ libxml2, wayland, qt5Full, nix, stdenv, fetchgit, runCommand }:
+{ wrapQtAppsHook, libxml2, wayland, qt5Full, nix, stdenv, fetchgit, runCommand }:
 
 let
     pname = "CyberiadaHSM-Editor";
@@ -75,8 +75,10 @@ in rec {
             rev = "b2e0f5dce4edeb33e2d9171769ad9d9aac177019";
             sha256 = "sha256-zkmBgOXMPUOdb3z6LlmvLPOuM6sBxwEPm4WF7HEySNc=";  
         };
-
-        buildInputs = [ wayland libxml2 qt5Full libSource libcyberiadaml ];
+        nativeBuildInputs = [
+            wrapQtAppsHook
+        ];
+        buildInputs = [ wrapQtAppsHook libxml2 qt5Full libSource libcyberiadaml ];
         configurePhase = ''
             mkdir -p $bin
             mkdir -p $out
@@ -84,7 +86,7 @@ in rec {
             ln -s ${libSource}/cyberiadaml.h ./cyberiadaml.h
             ln -s ${libSource}/cyberiadaml.c ./cyberiadaml.c
             mkdir ./cyberiadaml
-            ln -s ${libcyberiadaml.bin}/libcyberiadaml.a ./cyberiadam
+            ln -s ${libcyberiadaml.bin}/libcyberiadaml.a ./cyberiadaml
         '';
         buildPhase = ''
             qmake -makefile ./cyberiada.pro

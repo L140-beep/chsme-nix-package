@@ -1,4 +1,4 @@
-{ wrapQtAppsHook, libxml2, qtwayland, qtbase, qtwayland, nix, stdenv, fetchgit, runCommand }:
+{ wrapQtAppsHook, libxml2, qtbase, qtwayland, nix, stdenv, fetchgit, runCommand }:
 
 let
     pname = "CyberiadaHSM-Editor";

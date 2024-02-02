@@ -1,4 +1,4 @@
-{ wrapQtAppsHook, libxml2, wayland, qt5Full, nix, stdenv, fetchgit, runCommand }:
+{ wrapQtAppsHook, libxml2, qtwayland, qtbase, qtwayland, nix, stdenv, fetchgit, runCommand }:
 
 let
     pname = "CyberiadaHSM-Editor";
@@ -68,17 +68,16 @@ in rec {
     drv = stdenv.mkDerivation {
         pname = pname;
         version = version;
-        system = builtins.currentSystem;
         outputs = [ "bin" "out" ];
         src = fetchgit {
             url = "https://github.com/dralex/CyberiadaHSM-Editor.git";
             rev = "b2e0f5dce4edeb33e2d9171769ad9d9aac177019";
             sha256 = "sha256-zkmBgOXMPUOdb3z6LlmvLPOuM6sBxwEPm4WF7HEySNc=";  
         };
+        buildInputs = [ libxml2 qtbase libSource libcyberiadaml qtwayland ];
         nativeBuildInputs = [
             wrapQtAppsHook
         ];
-        buildInputs = [ wrapQtAppsHook libxml2 qt5Full libSource libcyberiadaml ];
         configurePhase = ''
             mkdir -p $bin
             mkdir -p $out
@@ -87,12 +86,12 @@ in rec {
             ln -s ${libSource}/cyberiadaml.c ./cyberiadaml.c
             mkdir ./cyberiadaml
             ln -s ${libcyberiadaml.bin}/libcyberiadaml.a ./cyberiadaml
+            export QT_QPA_PLATFORM_PLUGIN_PATH=1
         '';
         buildPhase = ''
             qmake -makefile ./cyberiada.pro
             make
         '';
-
         installPhase = ''
             cp CyberiadaHSME $bin
             cp CyberiadaHSME $out

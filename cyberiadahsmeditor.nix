@@ -1,4 +1,8 @@
-{ wrapQtAppsHook, libxml2, qtbase, qtwayland, nix, stdenv, fetchgit, runCommand }:
+{ wrapQtAppsHook, pkg-config, qmake
+, libxml2, qtbase, qtwayland, qttools 
+, fetchgit, runCommand, stdenv
+, mkDerivation
+}:
 
 let
     pname = "CyberiadaHSM-Editor";
@@ -11,7 +15,7 @@ let
         -The visual editor program for Cyberiada HSM graphs based on the Qt Framework.
         '';
     };
-in rec { 
+ 
     libxml = stdenv.mkDerivation {
         name = "libxml" ;
         system = builtins.currentSystem;
@@ -53,11 +57,13 @@ in rec {
             cp libcyberiadaml.a $out/
         '';
     };
+
     # TODO Создать libcyberiada.dev и положить туда .h .c файлы
     libSource = fetchgit {
             url = "https://github.com/kruzhok-team/libcyberiadaml";
             rev = "d78e58130668a7cc1aa938ab775881e4090b25fd";
-            sha256 = "sha256-OL02lRWGqcI32odBY5nr7EZicIkoR9BNG2Ac2ajdyEg=";
+            # sha256 = "sha256-OL02lRWGqcI32odBY5nr7EZicIkoR9BNG2Ac2ajdyEg=";
+            sha256 = "sha256-cv/7Njnb5IOAzrGol8nGiRup4xTh0Ke4q1UCUADebz0=";
             # Почему-то не сработало, все равно всю репу выкачивает :(
             sparseCheckout = [
                 "cyberiadaml.c"
@@ -65,10 +71,11 @@ in rec {
             ];
         }; 
 
-    drv = stdenv.mkDerivation {
+in
+
+mkDerivation {
         pname = pname;
         version = version;
-        outputs = [ "bin" "out" ];
         src = fetchgit {
             url = "https://github.com/dralex/CyberiadaHSM-Editor.git";
             rev = "b2e0f5dce4edeb33e2d9171769ad9d9aac177019";
@@ -76,10 +83,10 @@ in rec {
         };
         buildInputs = [ libxml2 qtbase libSource libcyberiadaml qtwayland ];
         nativeBuildInputs = [
-            wrapQtAppsHook
+            pkg-config qmake qttools
         ];
         configurePhase = ''
-            mkdir -p $bin
+            # mkdir -p $bin
             mkdir -p $out
             ls ${libSource}
             ln -s ${libSource}/cyberiadaml.h ./cyberiadaml.h
@@ -87,14 +94,11 @@ in rec {
             mkdir ./cyberiadaml
             ln -s ${libcyberiadaml.bin}/libcyberiadaml.a ./cyberiadaml
             export QT_QPA_PLATFORM_PLUGIN_PATH=1
-        '';
-        buildPhase = ''
             qmake -makefile ./cyberiada.pro
-            make
         '';
+        enableParallelBuilding = true;
         installPhase = ''
-            cp CyberiadaHSME $bin
-            cp CyberiadaHSME $out
+            mkdir -p $out/bin
+            cp CyberiadaHSME $out/bin
         '';
-    };
 }
